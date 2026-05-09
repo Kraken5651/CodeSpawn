@@ -1,0 +1,23 @@
+$env:NODE_ENV = 'development'
+$env:PORT = '5000'
+$env:API_URL = 'http://localhost:5000'
+$env:DB_HOST = 'localhost'
+$env:DB_PORT = '5432'
+$env:DB_NAME = 'codespawn_dev'
+$env:DB_USER = 'codespawn'
+$env:DB_PASSWORD = 'dev_password'
+$env:DB_URL = 'postgresql://codespawn:dev_password@localhost:5432/codespawn_dev'
+$env:DB_AUTO_SYNC = 'true'
+$env:DB_SYNC_ALTER = 'false'
+$env:REDIS_HOST = 'localhost'
+$env:REDIS_PORT = '6379'
+$env:REDIS_URL = 'redis://localhost:6379/0'
+$env:JWT_SECRET = 'super_secret_key_change_me'
+$env:JWT_REFRESH_SECRET = 'super_secret_refresh_key_change_me'
+$env:CORS_ORIGIN = 'http://localhost:3000'
+$env:CORS_CREDENTIALS = 'true'
+$env:HELMET_ENABLED = 'true'
+$env:RATE_LIMITING_ENABLED = 'true'
+
+Set-Location -Path (Join-Path $PSScriptRoot 'backend')
+npm.cmd start

@@ -1,4 +1,4 @@
-# CodeKraken - Complete Database Schema
+# CodeSpawn - Complete Database Schema
 
 ## PostgreSQL Schema Definition
 
@@ -511,3 +511,4 @@ ratelimit:user:{userId}:submissions = counter
 queue:code_execution = {submissionIds to process}
 queue:achievements = {userIds to check}
 ```
+

@@ -1,6 +1,6 @@
-# CodeKraken API Documentation
+# CodeSpawn API Documentation
 
-Base URL: `https://api.codekraken.dev/api`
+Base URL: `https://api.codespawn.dev/api`
 
 Authentication: JWT Bearer token in `Authorization` header
 
@@ -950,3 +950,4 @@ X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
 X-RateLimit-Reset: 1234567890
 ```
+

@@ -1,4 +1,4 @@
-# CodeKraken System Architecture
+# CodeSpawn System Architecture
 
 ## 🏛️ High-Level Architecture
 
@@ -302,7 +302,7 @@ xp_transactions
     "role": "user|admin",
     "iat": 1234567890,
     "exp": 1234571490,
-    "iss": "codekraken"
+    "iss": "codespawn"
   },
   "signature": "..."
 }
@@ -582,3 +582,4 @@ GitHub/GitLab Webhook
 - Memory >85%
 - API response time >1s average
 - Failed job queue backlog
+

@@ -20,14 +20,14 @@
 ### Staging
 
 **Purpose**: Test deployment before production
-**URL**: https://staging.codekraken.dev
+**URL**: https://staging.codespawn.dev
 **Data**: Copy of production (weekly)
 **Uptime SLA**: 99.0%
 
 ### Production
 
 **Purpose**: Live user-facing environment
-**URL**: https://api.codekraken.dev, https://codekraken.dev
+**URL**: https://api.codespawn.dev, https://codespawn.dev
 **Data**: Real user data
 **Uptime SLA**: 99.9%
 
@@ -47,27 +47,27 @@
 
 ```bash
 # 1. Build and push Docker images
-docker build -t yourregistry/codekraken-backend:v1.0.0 ./backend
-docker build -t yourregistry/codekraken-frontend:v1.0.0 ./frontend
-docker push yourregistry/codekraken-backend:v1.0.0
-docker push yourregistry/codekraken-frontend:v1.0.0
+docker build -t yourregistry/codespawn-backend:v1.0.0 ./backend
+docker build -t yourregistry/codespawn-frontend:v1.0.0 ./frontend
+docker push yourregistry/codespawn-backend:v1.0.0
+docker push yourregistry/codespawn-frontend:v1.0.0
 
 # 2. Create Kubernetes namespace
-kubectl create namespace codekraken
+kubectl create namespace codespawn
 
 # 3. Deploy database and cache
 # Using Helm
-helm install postgres bitnami/postgresql -n codekraken
-helm install redis bitnami/redis -n codekraken
+helm install postgres bitnami/postgresql -n codespawn
+helm install redis bitnami/redis -n codespawn
 
 # 4. Apply Kubernetes manifests
-kubectl apply -f k8s/backend.yaml -n codekraken
-kubectl apply -f k8s/frontend.yaml -n codekraken
-kubectl apply -f k8s/ingress.yaml -n codekraken
+kubectl apply -f k8s/backend.yaml -n codespawn
+kubectl apply -f k8s/frontend.yaml -n codespawn
+kubectl apply -f k8s/ingress.yaml -n codespawn
 
 # 5. Verify deployment
-kubectl rollout status deployment/backend -n codekraken
-kubectl get pods -n codekraken
+kubectl rollout status deployment/backend -n codespawn
+kubectl get pods -n codespawn
 ```
 
 ### Option 2: Docker + Docker Swarm
@@ -79,18 +79,18 @@ kubectl get pods -n codekraken
 docker swarm init
 
 # 2. Create overlay network
-docker network create -d overlay codekraken
+docker network create -d overlay codespawn
 
 # 3. Create secrets for sensitive data
 docker secret create db_password -
 docker secret create jwt_secret -
 
 # 4. Deploy stack
-docker stack deploy -c docker-compose.prod.yml codekraken
+docker stack deploy -c docker-compose.prod.yml codespawn
 
 # 5. View services
 docker service ls
-docker service ps codekraken_backend
+docker service ps codespawn_backend
 ```
 
 ### Option 3: Traditional Server (DigitalOcean, AWS EC2, Linode)
@@ -116,8 +116,8 @@ curl -L "https://github.com/docker/compose/releases/latest/download/docker-compo
 chmod +x /usr/local/bin/docker-compose
 
 # 4. Clone repository
-git clone https://github.com/yourusername/codekraken.git
-cd codekraken
+git clone https://github.com/yourusername/codespawn.git
+cd codespawn
 
 # 5. Create production .env
 nano .env
@@ -130,7 +130,7 @@ docker-compose -f docker-compose.prod.yml up -d
 
 # 8. Setup SSL with Certbot
 apt install certbot python3-certbot-nginx -y
-certbot certonly --nginx -d codekraken.dev -d api.codekraken.dev
+certbot certonly --nginx -d codespawn.dev -d api.codespawn.dev
 ```
 
 ---
@@ -170,7 +170,7 @@ services:
       retries: 5
 
   backend:
-    image: yourregistry/codekraken-backend:latest
+    image: yourregistry/codespawn-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -201,13 +201,13 @@ services:
       retries: 3
 
   frontend:
-    image: yourregistry/codekraken-frontend:latest
+    image: yourregistry/codespawn-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
-      REACT_APP_API_URL: https://api.codekraken.dev
-      REACT_APP_WS_URL: wss://api.codekraken.dev
+      REACT_APP_API_URL: https://api.codespawn.dev
+      REACT_APP_WS_URL: wss://api.codespawn.dev
     depends_on:
       - backend
     restart: always
@@ -248,7 +248,7 @@ upstream backend {
 
 server {
     listen 80;
-    server_name codekraken.dev api.codekraken.dev;
+    server_name codespawn.dev api.codespawn.dev;
     
     # Redirect HTTP to HTTPS
     location / {
@@ -258,7 +258,7 @@ server {
 
 server {
     listen 443 ssl http2;
-    server_name api.codekraken.dev;
+    server_name api.codespawn.dev;
     
     ssl_certificate /etc/nginx/ssl/cert.pem;
     ssl_certificate_key /etc/nginx/ssl/key.pem;
@@ -306,7 +306,7 @@ server {
 
 server {
     listen 443 ssl http2;
-    server_name codekraken.dev;
+    server_name codespawn.dev;
     
     ssl_certificate /etc/nginx/ssl/cert.pem;
     ssl_certificate_key /etc/nginx/ssl/key.pem;
@@ -363,7 +363,7 @@ psql -U $DB_USER $DB_NAME < backup_*.sql
 
 ```bash
 # Backend health endpoint
-curl https://api.codekraken.dev/api/health
+curl https://api.codespawn.dev/api/health
 
 # Response should be
 {
@@ -411,7 +411,7 @@ Never commit `.env` to repository!
 ```bash
 # Use secure secrets management
 # AWS Secrets Manager
-aws secretsmanager create-secret --name codekraken/jwt-secret
+aws secretsmanager create-secret --name codespawn/jwt-secret
 
 # Or use .env.production (gitignored)
 # Load via: source .env.production
@@ -461,7 +461,7 @@ const limiter = rateLimit({
 0 2 * * * docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U $DB_USER $DB_NAME | gzip > /backups/db_$(date +\%Y\%m\%d).sql.gz
 
 # Weekly S3 upload
-0 3 * * 0 aws s3 sync /backups s3://codekraken-backups/
+0 3 * * 0 aws s3 sync /backups s3://codespawn-backups/
 
 # Retention: Keep 30 days locally, 1 year in S3
 ```
@@ -595,7 +595,7 @@ certbot renew --dry-run
 certbot renew --force-renewal
 
 # Check certificate
-openssl x509 -in /etc/letsencrypt/live/codekraken.dev/cert.pem -text -noout
+openssl x509 -in /etc/letsencrypt/live/codespawn.dev/cert.pem -text -noout
 ```
 
 ---
@@ -607,11 +607,11 @@ If deployment fails:
 ```bash
 # 1. Revert to previous image
 docker-compose -f docker-compose.prod.yml down
-docker rmi yourregistry/codekraken-backend:v1.1.0
+docker rmi yourregistry/codespawn-backend:v1.1.0
 docker-compose -f docker-compose.prod.yml up -d -f docker-compose.old.yml
 
 # 2. Verify health
-curl https://api.codekraken.dev/api/health
+curl https://api.codespawn.dev/api/health
 
 # 3. Check logs
 docker-compose logs backend
@@ -682,4 +682,5 @@ Activities:
 - Cache clearing
 ```
 
-Status page: https://status.codekraken.dev
+Status page: https://status.codespawn.dev
+

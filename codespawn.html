@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CodeKraken — Learn C# Through Combat</title>
+<title>CodeSpawn — Learn C# Through Combat</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oxanium:wght@400;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -344,7 +344,7 @@ body { display:flex; flex-direction:column; }
 <div class="screen active" id="screen-title">
   <div class="title-particles" id="particles"></div>
   
-  <div class="title-logo">⚗️ CodeKraken</div>
+  <div class="title-logo">⚗️ CodeSpawn</div>
   <div class="title-sub">// learn c# through combat</div>
   <p class="title-desc">
     Type real C# code to cast spells, defeat enemies, and unlock new abilities. Every concept you learn becomes a weapon.
@@ -370,7 +370,7 @@ body { display:flex; flex-direction:column; }
   
   <!-- TOP BAR -->
   <div class="topbar">
-    <div class="topbar-logo">⚗️ CodeKraken</div>
+    <div class="topbar-logo">⚗️ CodeSpawn</div>
     <div class="topbar-zone" id="topbar-zone">// Forest of Variables</div>
     <div class="topbar-right">
       <div class="stat-pill">❤️ <span class="val" id="stat-hp">100</span>/<span id="stat-maxhp">100</span></div>
@@ -555,12 +555,12 @@ const CHALLENGES = [
     concept:'Variables — string',
     lesson:{
       sections:[
-        { h:'Strings', text:'string stores text. Always wrap text in double quotes "". C# strings are Unicode — emojis work too!', code:'string playerName = "Kraken";\nstring weapon = "Sword of Bytes";\nstring empty = ""; // empty string' },
-        { h:'String Concatenation', text:'Join strings with +', code:'string first = "Code";\nstring second = "Kraken";\nstring full = first + second; // "CodeKraken"' },
+        { h:'Strings', text:'string stores text. Always wrap text in double quotes "". C# strings are Unicode — emojis work too!', code:'string playerName = "Spawn";\nstring weapon = "Sword of Bytes";\nstring empty = ""; // empty string' },
+        { h:'String Concatenation', text:'Join strings with +', code:'string first = "Code";\nstring second = "Spawn";\nstring full = first + second; // "CodeSpawn"' },
       ]
     },
     validate(code){ return /string\s+playerName\s*=\s*"[^"]+"\s*;/.test(code); },
-    hints:['Try: string playerName = "Kraken";', 'String values need double quotes around them!'],
+    hints:['Try: string playerName = "Spawn";', 'String values need double quotes around them!'],
     successMsg:'✅ "I know your name now." The moth dissolves into light.',
     attack:'🌀 You weave a String Trap! The moth is caught in a web of words!',
   },
@@ -786,7 +786,7 @@ const CHALLENGES = [
     concept:'Methods',
     lesson:{
       sections:[
-        { h:'Methods (Functions)', text:'A method is a reusable block of code with a name. It can take parameters and optionally return a value.', code:'// returnType MethodName(parameters) { body }\nvoid Greet(string name) {\n    // do something with name\n}\n\n// Call it:\nGreet("Kraken");' },
+        { h:'Methods (Functions)', text:'A method is a reusable block of code with a name. It can take parameters and optionally return a value.', code:'// returnType MethodName(parameters) { body }\nvoid Greet(string name) {\n    // do something with name\n}\n\n// Call it:\nGreet("Spawn");' },
         { h:'Return Types', text:'void = returns nothing. Otherwise, specify the type and use return.', code:'void SayHi() {\n    // no return needed\n}\n\nint AddTwo(int a, int b) {\n    return a + b; // must return int\n}\n\nstring GetTitle(int lvl) {\n    return lvl > 5 ? "Master" : "Novice";\n}' },
       ]
     },
@@ -833,7 +833,7 @@ const CHALLENGES = [
     lesson:{
       sections:[
         { h:'Classes', text:'A class is a blueprint for creating objects. It bundles data (fields/properties) and behavior (methods).', code:'class Player {\n    public string Name;\n    public int Health;\n    public float Speed;\n}' },
-        { h:'Creating Objects', text:'Use new to create an instance from a class.', code:'Player hero = new Player();\nhero.Name = "Kraken";\nhero.Health = 100;\n// hero.Health → 100' },
+        { h:'Creating Objects', text:'Use new to create an instance from a class.', code:'Player hero = new Player();\nhero.Name = "Spawn";\nhero.Health = 100;\n// hero.Health → 100' },
         { h:'Properties with get/set', text:'Properties are smarter fields with getters and setters.', code:'class Enemy {\n    public string Name { get; set; }\n    public int HP { get; set; }\n}' },
       ]
     },
@@ -928,7 +928,7 @@ const CHALLENGES = [
       'class Hero {\n    public string Name;\n    public int Level;',
       '    public Hero(string name, int level) {\n        Name = name; Level = level;\n    }\n    public int Attack() { return Level * 10; }\n}'
     ],
-    successMsg:'🏆🏆🏆 THE DRAGON OVERLORD IS DEFEATED!!! You have mastered C# fundamentals! IndieKraken rises!',
+    successMsg:'🏆🏆🏆 THE DRAGON OVERLORD IS DEFEATED!!! You have mastered C# fundamentals! IndieSpawn rises!',
     attack:'🌋 Ultimate Code Blast! Your Hero class unleashes its full power!',
   },
 ];
@@ -1263,10 +1263,10 @@ function transitionZone(zone, cb) {
 }
 
 function showVictory() {
-  log('success', '🌟🌟🌟 YOU HAVE COMPLETED CODEKRAKEN! ALL C# FUNDAMENTALS MASTERED!');
+  log('success', '🌟🌟🌟 YOU HAVE COMPLETED CODESPAWN! ALL C# FUNDAMENTALS MASTERED!');
   log('xp', `Final Score: ${state.xp} XP | Level: ${state.level} | Concepts: ${state.learnedConcepts.length}`);
   log('story', '🐉 The Dragon Overlord is no more. Peace returns to the Code Realm.');
-  log('hint', '💡 Now apply everything you learned to your Unity projects, IndieKraken! 🦑');
+  log('hint', '💡 Now apply everything you learned to your Unity projects, IndieSpawn! 🦑');
   showAchievement('👑 GAME COMPLETE!', 'C# Fundamentals Mastered!');
 }
 
@@ -1611,3 +1611,4 @@ document.addEventListener('keydown', e => {
 </script>
 </body>
 </html>
+

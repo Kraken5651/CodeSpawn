@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>CodeKraken</title>
+<title>CodeSpawn</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Share+Tech+Mono&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ─── RESET & ROOT ─────────────────────────────────────── */
@@ -578,7 +578,7 @@ code{font-family:'Share Tech Mono',monospace}
   <div class="title-stars" id="title-stars"></div>
   <div class="title-glow"></div>
   <div class="t-eyebrow">// a coding rpg for game developers</div>
-  <div class="t-logo">CodeKraken</div>
+  <div class="t-logo">CodeSpawn</div>
   <div class="t-tagline">Type real C# code. Fight real enemies. Build real skills.</div>
   <div class="t-cards">
     <div class="t-card"><div class="t-card-icon">📖</div><div class="t-card-name">Academy</div><div class="t-card-sub">8 chapters · 60+ lessons</div></div>
@@ -598,7 +598,7 @@ code{font-family:'Share Tech Mono',monospace}
 ═══════════════════════════════════ -->
 <div class="screen" id="game-wrap">
   <div class="topnav">
-    <div class="nav-logo">⚗ CodeKraken</div>
+    <div class="nav-logo">⚗ CodeSpawn</div>
     <div class="nav-tabs">
       <button class="nav-tab active" id="tab-academy" onclick="switchMainTab('academy')">📖 Academy</button>
       <button class="nav-tab" id="tab-realm" onclick="switchMainTab('realm')">⚔️ The Realm</button>
@@ -1041,7 +1041,7 @@ const TOTAL_CHALLENGES=ALL_LESSONS.filter(l=>l.challenge).length;
   <div class="concept-block-title">var — Type Inference</div>
   <p>The <span class="ic">var</span> keyword lets the compiler infer the type from the assigned value. Only works when you assign immediately.</p>
   <div class="cb"><span class="kw">var</span> score    = <span class="num">0</span>;        <span class="cm">// inferred: int</span>
-<span class="kw">var</span> username = <span class="str">"Kraken"</span>; <span class="cm">// inferred: string</span>
+<span class="kw">var</span> username = <span class="str">"Spawn"</span>; <span class="cm">// inferred: string</span>
 <span class="kw">var</span> ratio    = <span class="num">0.5f</span>;     <span class="cm">// inferred: float</span></div>
 </div>
 <div class="concept-block">
@@ -1049,7 +1049,7 @@ const TOTAL_CHALLENGES=ALL_LESSONS.filter(l=>l.challenge).length;
   <p>Use <span class="ic">const</span> for values that never change. This is a compile-time guarantee and prevents bugs.</p>
   <div class="cb"><span class="kw">const int</span>    MAX_HP    = <span class="num">100</span>;
 <span class="kw">const float</span>  GRAVITY   = <span class="num">9.81f</span>;
-<span class="kw">const string</span> GAME_NAME = <span class="str">"CodeKraken"</span>;</div>
+<span class="kw">const string</span> GAME_NAME = <span class="str">"CodeSpawn"</span>;</div>
 </div>`,
       challenge:{
         title:'Declare a Player Stats Block',
@@ -2345,7 +2345,7 @@ const RPG_CHALLENGES = [
   {id:'r09',zone:'castle',title:'The Castle Dragon 🐉 BOSS',desc:'BOSS: Create a <code>PlayerController</code> class inheriting <code>MonoBehaviour</code> with a <code>float speed = 5f</code> field, a <code>Rigidbody rb</code> field, <code>Awake()</code> caching the Rigidbody, and <code>FixedUpdate()</code> calling <code>rb.AddForce(Vector3.up)</code>.',enemy:{name:'Castle Dragon',emoji:'🐉',hp:8,maxHp:8,xp:240,isBoss:true},concept:'MonoBehaviour + Physics',hints:['public class PlayerController : MonoBehaviour {','    public float speed = 5f;  Rigidbody rb;','    void Awake() { rb = GetComponent<Rigidbody>(); }','    void FixedUpdate() { rb.AddForce(Vector3.up); }\n}'],validate(c){const n=c.replace(/\s+/g,' ');return/class\s+PlayerController\s*:\s*MonoBehaviour/.test(n)&&/float\s+speed\s*=\s*5f/.test(n)&&/Rigidbody\s+rb/.test(n)&&/GetComponent\s*<\s*Rigidbody\s*>/.test(n)&&/AddForce/.test(n)},attack:'🐉 Full MonoBehaviour deployed — Dragon can\'t touch you!',win:'🏆 CASTLE CLEARED! You are a Unity warrior!'},
   // VOLCANO
   {id:'r10',zone:'volcano',title:'The Singleton Demon',desc:'Create a <code>GameManager</code> Singleton: <code>public static GameManager Instance</code>, <code>public int score = 0</code>, and in <code>Awake()</code> set <code>Instance = this</code> if null, else <code>Destroy(gameObject)</code>.',enemy:{name:'Singleton Demon',emoji:'👹',hp:5,maxHp:5,xp:120,isBoss:false},concept:'Singleton',hints:['public class GameManager : MonoBehaviour {','    public static GameManager Instance;  public int score = 0;','    void Awake() { if(Instance==null){Instance=this;} else{Destroy(gameObject);} }\n}'],validate(c){const n=c.replace(/\s+/g,' ');return/class\s+GameManager\s*:\s*MonoBehaviour/.test(n)&&/static\s+GameManager\s+Instance/.test(n)&&/int\s+score\s*=\s*0/.test(n)&&/void\s+Awake/.test(n)&&/Instance\s*=\s*this/.test(n)&&/Destroy/.test(n)},attack:'👑 One instance rules all!',win:'Demon: "Only ONE of me exists now..."'},
-  {id:'r11',zone:'volcano',title:'🌋 DRAGON OVERLORD — FINAL BOSS',desc:'THE FINAL TEST: Write a <code>EnemyAI</code> class inheriting MonoBehaviour. Declare <code>NavMeshAgent agent</code>, <code>Transform target</code>, <code>float chaseRange = 10f</code>. In Awake get the NavMeshAgent. In Update, check if <code>Vector3.Distance(transform.position, target.position) &lt; chaseRange</code> and if so call <code>agent.SetDestination(target.position)</code>.',enemy:{name:'Dragon Overlord',emoji:'🐲',hp:10,maxHp:10,xp:500,isBoss:true},concept:'Full Unity AI',hints:['using UnityEngine.AI;  public class EnemyAI : MonoBehaviour {','    NavMeshAgent agent;  Transform target;  float chaseRange = 10f;','    void Awake() { agent = GetComponent<NavMeshAgent>(); }','    void Update() { if(Vector3.Distance(transform.position,target.position)<chaseRange) agent.SetDestination(target.position); }\n}'],validate(c){const n=c.replace(/\s+/g,' ');return/class\s+EnemyAI\s*:\s*MonoBehaviour/.test(n)&&/NavMeshAgent\s+agent/.test(n)&&/Transform\s+target/.test(n)&&/float\s+chaseRange/.test(n)&&/GetComponent\s*<\s*NavMeshAgent\s*>/.test(n)&&/SetDestination/.test(n)&&/Vector3\.Distance/.test(n)},attack:'🌋 ULTIMATE CODE BLAST — Full Unity AI deployed!',win:'🏆🏆🏆 DRAGON OVERLORD DEFEATED! CodeKraken — COMPLETE!'},
+  {id:'r11',zone:'volcano',title:'🌋 DRAGON OVERLORD — FINAL BOSS',desc:'THE FINAL TEST: Write a <code>EnemyAI</code> class inheriting MonoBehaviour. Declare <code>NavMeshAgent agent</code>, <code>Transform target</code>, <code>float chaseRange = 10f</code>. In Awake get the NavMeshAgent. In Update, check if <code>Vector3.Distance(transform.position, target.position) &lt; chaseRange</code> and if so call <code>agent.SetDestination(target.position)</code>.',enemy:{name:'Dragon Overlord',emoji:'🐲',hp:10,maxHp:10,xp:500,isBoss:true},concept:'Full Unity AI',hints:['using UnityEngine.AI;  public class EnemyAI : MonoBehaviour {','    NavMeshAgent agent;  Transform target;  float chaseRange = 10f;','    void Awake() { agent = GetComponent<NavMeshAgent>(); }','    void Update() { if(Vector3.Distance(transform.position,target.position)<chaseRange) agent.SetDestination(target.position); }\n}'],validate(c){const n=c.replace(/\s+/g,' ');return/class\s+EnemyAI\s*:\s*MonoBehaviour/.test(n)&&/NavMeshAgent\s+agent/.test(n)&&/Transform\s+target/.test(n)&&/float\s+chaseRange/.test(n)&&/GetComponent\s*<\s*NavMeshAgent\s*>/.test(n)&&/SetDestination/.test(n)&&/Vector3\.Distance/.test(n)},attack:'🌋 ULTIMATE CODE BLAST — Full Unity AI deployed!',win:'🏆🏆🏆 DRAGON OVERLORD DEFEATED! CodeSpawn — COMPLETE!'},
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -2674,7 +2674,7 @@ function rpgEnemyDead(ch){
   } else {
     setTimeout(()=>{
       rlog('cast','🌟🌟🌟 THE REALM IS CONQUERED! All enemies defeated!');
-      rlog('xp','You have mastered C# for Unity game development. IndieKraken rises! 🦑');
+      rlog('xp','You have mastered C# for Unity game development. IndieSpawn rises! 🦑');
       toast('👑 The Realm Complete!','C# Mastered — Ship your game!');
     },1000);
   }
@@ -2896,3 +2896,4 @@ load();updateNav();updateRpgPlayerHud();
 </script>
 </body>
 </html>
+

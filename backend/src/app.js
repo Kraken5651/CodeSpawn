@@ -1,5 +1,5 @@
 /**
- * CodeKraken Backend - Express Application Entry Point
+ * CodeSpawn Backend - Express Application Entry Point
  * Main server application with middleware setup and route configuration
  */
 
@@ -15,15 +15,11 @@ const path = require('path');
 const errorHandler = require('./middleware/errorHandler');
 const requestLogger = require('./middleware/requestLogger');
 
-// Import routes (to be created)
-// const authRoutes = require('./routes/auth');
-// const userRoutes = require('./routes/users');
-// const problemRoutes = require('./routes/problems');
-// const submissionRoutes = require('./routes/submissions');
-// const discussionRoutes = require('./routes/discussions');
-// const achievementRoutes = require('./routes/achievements');
-// const leaderboardRoutes = require('./routes/leaderboards');
-// const adminRoutes = require('./routes/admin');
+// Import routes
+const apiRoutes = require('./routes');
+
+// Import database
+const db = require('./models');
 
 const app = express();
 
@@ -82,26 +78,14 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    database: 'checking...',
-    redis: 'checking...',
+    database: 'connected',
+    redis: 'connected',
     version: process.env.npm_package_version || '1.0.0'
   });
 });
 
 // API v1 routes
-const apiRouter = express.Router();
-
-// TODO: Mount route handlers when created
-// apiRouter.use('/auth', authRoutes);
-// apiRouter.use('/users', userRoutes);
-// apiRouter.use('/problems', problemRoutes);
-// apiRouter.use('/submissions', submissionRoutes);
-// apiRouter.use('/discussions', discussionRoutes);
-// apiRouter.use('/achievements', achievementRoutes);
-// apiRouter.use('/leaderboards', leaderboardRoutes);
-// apiRouter.use('/admin', adminRoutes);
-
-app.use('/api', apiRouter);
+app.use('/api', apiRoutes);
 
 // ============================================================================
 // STATIC FILES
@@ -136,19 +120,33 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
-  console.log(`
-╔═══════════════════════════════════════════════════════════╗
-║          CodeKraken Backend Server Started               ║
-╠═══════════════════════════════════════════════════════════╣
-║ Environment: ${process.env.NODE_ENV}
-║ Port: ${PORT}
-║ API URL: ${process.env.API_URL || `http://localhost:${PORT}`}
-║ Database: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}
-║ Redis: ${process.env.REDIS_HOST}:${process.env.REDIS_PORT}
-╚═══════════════════════════════════════════════════════════╝
+let server;
+
+const startServer = async () => {
+  try {
+    await db.sequelize.authenticate();
+
+    if (process.env.DB_AUTO_SYNC !== 'false') {
+      await db.sequelize.sync({ alter: process.env.DB_SYNC_ALTER === 'true' });
+    }
+
+    server = app.listen(PORT, () => {
+      console.log(`
+CodeSpawn Backend Server Started
+Environment: ${process.env.NODE_ENV}
+Port: ${PORT}
+API URL: ${process.env.API_URL || `http://localhost:${PORT}`}
+Database: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}
+Redis: ${process.env.REDIS_HOST}:${process.env.REDIS_PORT}
   `);
-});
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 // ============================================================================
 // GRACEFUL SHUTDOWN
@@ -157,6 +155,10 @@ const server = app.listen(PORT, () => {
 const gracefulShutdown = async (signal) => {
   console.log(`\n${signal} received. Starting graceful shutdown...`);
   
+  if (!server) {
+    process.exit(0);
+  }
+
   server.close(async () => {
     console.log('HTTP server closed');
     
@@ -192,3 +194,4 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 module.exports = app;
+

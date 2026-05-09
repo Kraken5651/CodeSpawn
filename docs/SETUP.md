@@ -24,8 +24,8 @@ Before starting, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/codekraken.git
-cd codekraken
+git clone https://github.com/yourusername/codespawn.git
+cd codespawn
 ```
 
 ### 2. Setup Environment Variables
@@ -47,10 +47,10 @@ API_URL=http://localhost:5000
 # Database
 DB_HOST=postgres
 DB_PORT=5432
-DB_NAME=codekraken_dev
-DB_USER=codekraken
+DB_NAME=codespawn_dev
+DB_USER=codespawn
 DB_PASSWORD=dev_password_change_me
-DB_URL=postgresql://codekraken:dev_password_change_me@postgres:5432/codekraken_dev
+DB_URL=postgresql://codespawn:dev_password_change_me@postgres:5432/codespawn_dev
 
 # Redis
 REDIS_HOST=redis
@@ -122,7 +122,7 @@ npm install
 # Create .env file (already copied above)
 
 # Create database
-createdb codekraken_dev
+createdb codespawn_dev
 
 # Run migrations
 npm run migrate
@@ -164,9 +164,9 @@ brew services start redis
 
 # Or use Docker just for services
 docker run -d -p 5432:5432 \
-  -e POSTGRES_USER=codekraken \
+  -e POSTGRES_USER=codespawn \
   -e POSTGRES_PASSWORD=dev_password \
-  -e POSTGRES_DB=codekraken_dev \
+  -e POSTGRES_DB=codespawn_dev \
   postgres:14-alpine
 
 docker run -d -p 6379:6379 redis:7-alpine
@@ -239,7 +239,7 @@ npm run migrate:reset
 npm run migrate:status
 
 # Access database console
-psql postgres://codekraken:password@localhost:5432/codekraken_dev
+psql postgres://codespawn:password@localhost:5432/codespawn_dev
 ```
 
 ### Useful npm Scripts
@@ -304,13 +304,13 @@ docker-compose exec backend npm run migrate
 
 ```bash
 # Using psql
-psql -h localhost -U codekraken -d codekraken_dev
+psql -h localhost -U codespawn -d codespawn_dev
 
 # Using Docker
-docker-compose exec postgres psql -U codekraken -d codekraken_dev
+docker-compose exec postgres psql -U codespawn -d codespawn_dev
 
 # Connection string
-postgresql://codekraken:dev_password@localhost:5432/codekraken_dev
+postgresql://codespawn:dev_password@localhost:5432/codespawn_dev
 ```
 
 ### Redis
@@ -375,12 +375,12 @@ docker-compose ps postgres
 psql $DB_URL
 
 # Check database exists
-docker-compose exec postgres psql -U codekraken -l
+docker-compose exec postgres psql -U codespawn -l
 
 # Reset database (⚠️ WARNING: Deletes all data)
 docker-compose down -v
 docker-compose up -d postgres
-docker-compose exec postgres psql -U codekraken -c "CREATE DATABASE codekraken_dev;"
+docker-compose exec postgres psql -U codespawn -c "CREATE DATABASE codespawn_dev;"
 ```
 
 ### Port Already In Use
@@ -483,10 +483,10 @@ docker-compose exec redis redis-cli ping
 
 ## Getting Help
 
-- **Issues**: https://github.com/yourusername/codekraken/issues
-- **Discussions**: https://github.com/yourusername/codekraken/discussions
-- **Discord**: [Join Community](https://discord.gg/codekraken)
-- **Documentation**: [Docs Site](https://docs.codekraken.dev)
+- **Issues**: https://github.com/yourusername/codespawn/issues
+- **Discussions**: https://github.com/yourusername/codespawn/discussions
+- **Discord**: [Join Community](https://discord.gg/codespawn)
+- **Documentation**: [Docs Site](https://docs.codespawn.dev)
 
 ---
 
@@ -525,3 +525,4 @@ node --inspect-brk backend/src/app.js
 # Enable debug logging
 DEBUG=app:* npm run dev
 ```
+

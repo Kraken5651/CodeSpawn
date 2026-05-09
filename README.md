@@ -1,4 +1,4 @@
-# 🦑 CodeKraken - Multi-Language Gamified Coding Learning Platform
+# 🦑 CodeSpawn - Multi-Language Gamified Coding Learning Platform
 
 > Learn to code and master game development through gamified challenges, streaks, and community interaction. Similar to LeetCode, GeeksForGeeks, and Exercism but focused on **game development**.
 
@@ -63,7 +63,7 @@
 ## 📁 Project Structure
 
 ```
-codekraken/
+codespawn/
 ├── README.md                    # This file
 ├── docs/                        # Documentation
 │   ├── API.md                   # API endpoints
@@ -125,8 +125,8 @@ codekraken/
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/yourusername/codekraken.git
-cd codekraken
+git clone https://github.com/yourusername/codespawn.git
+cd codespawn
 
 # 2. Setup environment
 cp .env.example .env
@@ -360,15 +360,16 @@ MIT License - see [LICENSE](./LICENSE) file
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/yourusername/codekraken/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/codekraken/discussions)
-- **Email:** support@codekraken.dev
-- **Discord:** [Join Our Community](https://discord.gg/codekraken)
+- **Issues:** [GitHub Issues](https://github.com/yourusername/codespawn/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/yourusername/codespawn/discussions)
+- **Email:** support@codespawn.dev
+- **Discord:** [Join Our Community](https://discord.gg/codespawn)
 
 ---
 
 ## 🎯 Vision
 
-CodeKraken aims to be the **premier platform for aspiring and experienced developers** to learn game development through hands-on coding challenges, community interaction, and gamified progression. We believe coding should be engaging, rewarding, and social.
+CodeSpawn aims to be the **premier platform for aspiring and experienced developers** to learn game development through hands-on coding challenges, community interaction, and gamified progression. We believe coding should be engaging, rewarding, and social.
 
 **"Code like a gamer. Learn like a pro. Build like a master."** 🦑🎮
+
