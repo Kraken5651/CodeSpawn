@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Flame, Star, Trophy, Code, Home, Settings, Terminal, BarChart2, ArrowLeft, Play, Lock, User, Save } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { curriculum, paths, languages } from '../data/curriculum';
 
 const Dashboard = ({ profile, onSelectLesson, onBackToHome, updateProfile }) => {
@@ -34,6 +35,9 @@ const Dashboard = ({ profile, onSelectLesson, onBackToHome, updateProfile }) => 
           <button className={`nav-item ${activeTab === 'lab' ? 'active' : ''}`} onClick={() => setActiveTab('lab')}>
             <Terminal size={18} /> Sandbox Lab
           </button>
+          <Link to="/problems" className="nav-item">
+            <Code size={18} /> Challenges
+          </Link>
         </div>
 
         <div className="sidebar-section">
