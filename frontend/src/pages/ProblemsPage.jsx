@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Filter, CheckCircle, ChevronRight, Trophy, Code, Zap, Loader2 } from 'lucide-react';
+import { Search, ChevronRight, Trophy, Code, Zap, Loader2 } from 'lucide-react';
 import api from '../services/api';
+import { problems as localProblems } from '../data/problems';
+
+const normalizeLocalProblem = (problem) => ({
+  ...problem,
+  difficulty: { name: problem.difficulty.toUpperCase(), xp_reward: problem.xp },
+  language: { name: 'JavaScript', slug: 'javascript' },
+  category: { name: problem.category },
+  xp_reward: problem.xp,
+  source: 'local',
+});
 
 const ProblemsPage = () => {
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [source, setSource] = useState('api');
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('All');
 
@@ -18,8 +29,9 @@ const ProblemsPage = () => {
         if (response.data.success) {
           setProblems(response.data.data.problems);
         }
-      } catch (error) {
-        console.error('Error fetching problems:', error);
+      } catch {
+        setProblems(localProblems.map(normalizeLocalProblem));
+        setSource('local');
       } finally {
         setLoading(false);
       }
@@ -41,6 +53,9 @@ const ProblemsPage = () => {
           <div className="header-content">
             <h1 className="text-3xl font-bold">Coding Challenges</h1>
             <p className="text-gray-400 mt-2">Level up your skills by solving real-world problems.</p>
+            {source === 'local' && (
+              <p className="offline-pill">Backend offline: practice mode is using built-in challenges.</p>
+            )}
           </div>
           <div className="stats-cards mt-8 flex gap-6">
             <div className="stat-card">
@@ -146,6 +161,7 @@ const ProblemsPage = () => {
 
       <style dangerouslySetInnerHTML={{ __html: `
         .problems-page { min-height: 100vh; background: #050505; color: white; }
+        .offline-pill { display: inline-flex; margin-top: 12px; border: 1px solid #334155; border-radius: 999px; padding: 7px 12px; background: #0f172a; color: #bfdbfe; font-size: 0.84rem; font-weight: 700; }
         .page-header { background: linear-gradient(to bottom, #111, #050505); padding: 4rem 0 2rem; border-bottom: 1px solid #111; }
         .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
         .stat-card { background: #111; border: 1px solid #222; padding: 1.25rem 2rem; border-radius: 1rem; display: flex; align-items: center; gap: 1rem; }

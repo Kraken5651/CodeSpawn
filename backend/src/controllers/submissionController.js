@@ -3,50 +3,149 @@
  * Handles code submission processing and results
  */
 
-const { Submission, Problem, UserProfile } = require('../models');
+const { Submission, Problem, User, UserProfile, Language, TestCase } = require('../models');
 const { AppError } = require('../middleware/errorHandler');
+const { judgeSubmission } = require('../services/submissionJudge');
+
+const getSubmissionUserId = async (req) => {
+  if (req.user?.id) {
+    return req.user.id;
+  }
+
+  const [demoUser] = await User.findOrCreate({
+    where: { email: 'demo@codespawn.local' },
+    defaults: {
+      username: 'demo_runner',
+      password_hash: 'demo-user-no-login',
+      role: 'user'
+    }
+  });
+
+  await UserProfile.findOrCreate({
+    where: { user_id: demoUser.id },
+    defaults: { user_id: demoUser.id }
+  });
+
+  return demoUser.id;
+};
 
 const submitCode = async (req, res, next) => {
   try {
-    const { problem_id, code, language_id } = req.body;
+    const { problem_id, code, language_id, language_slug } = req.body;
 
     // Validate input
-    if (!problem_id || !code || !language_id) {
-      throw new AppError('Problem ID, code, and language ID are required', 422, 'VALIDATION_ERROR');
+    if (!problem_id || !code || (!language_id && !language_slug)) {
+      throw new AppError('Problem ID, code, and language are required', 422, 'VALIDATION_ERROR');
     }
 
     // Check problem exists
-    const problem = await Problem.findByPk(problem_id);
+    const problem = await Problem.findByPk(problem_id, {
+      include: [
+        { association: 'language' }
+      ]
+    });
     if (!problem) {
       throw new AppError('Problem not found', 404, 'NOT_FOUND');
     }
 
+    const language = language_id
+      ? await Language.findByPk(language_id)
+      : await Language.findOne({ where: { slug: language_slug } });
+    if (!language) {
+      throw new AppError('Language not found', 404, 'NOT_FOUND');
+    }
+
+    const userId = await getSubmissionUserId(req);
+
     // Create submission record
     const submission = await Submission.create({
-      user_id: req.user.id,
+      user_id: userId,
       problem_id,
       code,
-      language_id,
+      language_id: language.id,
       status: 'PENDING'
     });
 
-    // TODO: Queue submission for execution in job queue (Bull)
-    // For now, just mark as created
+    await submission.update({
+      status: 'RUNNING',
+      started_at: new Date()
+    });
 
-    res.status(202).json({
+    const testCases = await TestCase.findAll({
+      where: { problem_id },
+      order: [['created_at', 'ASC']]
+    });
+
+    const result = await judgeSubmission({
+      code,
+      problem,
+      language,
+      testCases
+    });
+
+    await submission.update({
+      ...result,
+      completed_at: new Date()
+    });
+
+    problem.total_attempts += 1;
+    if (result.is_accepted) {
+      problem.total_solved += 1;
+    }
+    problem.acceptance_rate = problem.total_attempts > 0
+      ? Number(((problem.total_solved / problem.total_attempts) * 100).toFixed(2))
+      : 0;
+    await problem.save();
+
+    if (result.is_accepted) {
+      await awardAcceptedSubmission({ submission, problem });
+    }
+
+    res.status(201).json({
       success: true,
-      message: 'Submission queued for execution',
+      message: 'Submission executed',
       data: {
-        submission: {
-          id: submission.id,
-          status: submission.status,
-          submitted_at: submission.submitted_at
-        }
+        submission
       }
     });
   } catch (error) {
     next(error);
   }
+};
+
+const awardAcceptedSubmission = async ({ submission, problem }) => {
+  const userProfile = await UserProfile.findByPk(submission.user_id);
+
+  if (!userProfile) {
+    return;
+  }
+
+  const xpReward = problem.xp_reward || 50;
+  userProfile.total_xp += xpReward;
+  userProfile.level = Math.floor(userProfile.total_xp / 100) + 1;
+
+  const today = new Date().toDateString();
+  const lastSubmitDate = userProfile.last_submission_date?.toDateString();
+
+  if (lastSubmitDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+    if (lastSubmitDate === yesterday) {
+      userProfile.current_streak_count += 1;
+    } else {
+      userProfile.current_streak_count = 1;
+    }
+
+    if (userProfile.current_streak_count > userProfile.max_streak_count) {
+      userProfile.max_streak_count = userProfile.current_streak_count;
+    }
+
+    userProfile.last_submission_date = new Date();
+  }
+
+  userProfile.problems_solved += 1;
+
+  await userProfile.save();
 };
 
 const getSubmissionById = async (req, res, next) => {
@@ -83,6 +182,21 @@ const getSubmissionsByProblem = async (req, res, next) => {
   try {
     const { problem_id } = req.params;
     const { page = 1, limit = 20, status } = req.query;
+
+    if (!req.user?.id) {
+      return res.json({
+        success: true,
+        data: {
+          submissions: [],
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total: 0,
+            pages: 0
+          }
+        }
+      });
+    }
 
     const offset = (page - 1) * limit;
     const where = {

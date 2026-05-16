@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Code, Layout, Cpu, ArrowRight, Zap, Trophy, Flame, Play, Star } from 'lucide-react';
+import { Code, Layout, Cpu, Zap, Flame, Play, Star } from 'lucide-react';
 import { languages } from '../data/curriculum';
 
 const LanguageSelector = ({ onSelect, profile }) => {

@@ -1,143 +1,149 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Flame, Star, Trophy, Code, Home, Settings, Terminal, BarChart2, ArrowLeft, Play, Lock, User, Save } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, BarChart2, BookOpen, Code, Flame, Play, Save, Settings, Star, Trophy, User } from 'lucide-react';
 import { curriculum, paths, languages } from '../data/curriculum';
 
 const Dashboard = ({ profile, onSelectLesson, onBackToHome, updateProfile }) => {
-  const [activeTab, setActiveTab] = useState('roadmap');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'learn');
+  const [activeStageId, setActiveStageId] = useState('all');
   const [tempName, setTempName] = useState(profile.name);
 
-  const completedSet = new Set(profile.completed || []);
+  const completedSet = useMemo(() => new Set(profile.completed || []), [profile.completed]);
   const activePathId = profile.selectedLanguage || 'csharp-core';
   const path = paths[activePathId];
-  const langInfo = languages.find(l => l.id === activePathId) || languages[0];
+  const langInfo = languages.find((language) => language.id === activePathId) || languages[0];
+  const allStageIds = new Set(path?.stages.flatMap((stage) => stage.lessons) || []);
+  const pathLessons = curriculum.filter((lesson) => allStageIds.has(lesson.id));
+  const completedCount = pathLessons.filter((lesson) => completedSet.has(lesson.id)).length;
+  const progressPercent = pathLessons.length ? Math.round((completedCount / pathLessons.length) * 100) : 0;
+
+  const visibleStages = path?.stages.filter((stage) => activeStageId === 'all' || stage.id === activeStageId) || [];
 
   const handleSaveSettings = () => {
-    if (updateProfile) {
-      updateProfile({ name: tempName });
-    }
+    updateProfile?.({ name: tempName.trim() || 'Developer' });
   };
 
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab === 'settings' ? 'profile' : tab);
+    }
+  }, [searchParams]);
+
   return (
-    <div className="academy-dashboard">
-      <aside className="academy-sidebar">
-        <div className="sidebar-brand" onClick={onBackToHome}>
-          <ArrowLeft size={18} />
-          <span>Academy Home</span>
+    <div className="academy-shell">
+      <header className="academy-topbar">
+        <button className="topbar-back" onClick={onBackToHome}>
+          <ArrowLeft size={18} /> Courses
+        </button>
+
+        <div className="topbar-brand">
+          <span className="brand-dot" style={{ background: langInfo.color }} />
+          <div>
+            <strong>{langInfo.name}</strong>
+            <small>{completedCount}/{pathLessons.length} modules complete</small>
+          </div>
         </div>
 
-        <div className="sidebar-section">
-          <p className="section-label">TRAINING</p>
-          <button className={`nav-item ${activeTab === 'roadmap' ? 'active' : ''}`} onClick={() => setActiveTab('roadmap')}>
-            <BarChart2 size={18} /> Roadmap
+        <nav className="topbar-nav">
+          <button className={activeTab === 'learn' ? 'active' : ''} onClick={() => setActiveTab('learn')}>
+            <BookOpen size={16} /> Learn
           </button>
-          <button className={`nav-item ${activeTab === 'lab' ? 'active' : ''}`} onClick={() => setActiveTab('lab')}>
-            <Terminal size={18} /> Sandbox Lab
-          </button>
-          <Link to="/problems" className="nav-item">
-            <Code size={18} /> Challenges
+          <Link to="/problems">
+            <Code size={16} /> Challenges
           </Link>
-        </div>
-
-        <div className="sidebar-section">
-          <p className="section-label">OPERATIONS</p>
-          <button className={`nav-item ${activeTab === 'achievements' ? 'active' : ''}`} onClick={() => setActiveTab('achievements')}>
-            <Trophy size={18} /> Achievements
+          <button className={activeTab === 'progress' ? 'active' : ''} onClick={() => setActiveTab('progress')}>
+            <BarChart2 size={16} /> Progress
           </button>
-          <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
-            <Settings size={18} /> Settings
+          <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
+            <Settings size={16} /> Profile
           </button>
-        </div>
+        </nav>
+      </header>
 
-        <div className="sidebar-profile">
-          <div className="avatar-med">{profile.name[0]}</div>
-          <div className="profile-text">
-            <p className="p-name">{profile.name}</p>
-            <p className="p-lvl">Level {profile.level}</p>
-          </div>
-        </div>
-      </aside>
-
-      <main className="academy-content">
-        <header className="content-header">
-          <div className="header-title">
+      <main className="academy-main">
+        <section className="academy-overview">
+          <div className="overview-title">
             <span className="lang-pill" style={{ background: langInfo.color }}>{langInfo.name}</span>
-            <h1>
-              {activeTab === 'roadmap' && 'Development Roadmap'}
-              {activeTab === 'lab' && 'Freeplay Sandbox'}
-              {activeTab === 'achievements' && 'Hall of Fame'}
-              {activeTab === 'settings' && 'Account Settings'}
-            </h1>
+            <h1>{activeTab === 'learn' ? 'Choose a module and start coding' : activeTab === 'profile' ? 'Profile settings' : 'Your progress'}</h1>
           </div>
-          <div className="header-stats">
-            <div className="stat-box"><Flame size={14} className="warning" /> {profile.streak}</div>
-            <div className="stat-box"><Star size={14} className="accent" /> {profile.xp} XP</div>
+
+          <div className="overview-stats">
+            <div className="overview-stat"><Star size={16} /> <strong>{profile.xp}</strong><span>XP</span></div>
+            <div className="overview-stat"><Flame size={16} /> <strong>{profile.streak}</strong><span>Streak</span></div>
+            <div className="overview-stat"><Trophy size={16} /> <strong>{progressPercent}%</strong><span>Complete</span></div>
           </div>
-        </header>
+        </section>
 
-        {activeTab === 'roadmap' && path && (
-          <section className="roadmap-flow">
-            {path.stages.map((stage, sIdx) => (
-              <div key={stage.id} className="roadmap-stage">
-                <div className="stage-info">
-                  <div className="stage-num">{sIdx + 1}</div>
-                  <h2>{stage.title}</h2>
-                </div>
+        {activeTab === 'learn' && (
+          <>
+            <section className="stage-filter">
+              <button className={activeStageId === 'all' ? 'active' : ''} onClick={() => setActiveStageId('all')}>All phases</button>
+              {path?.stages.map((stage, index) => (
+                <button
+                  key={stage.id}
+                  className={activeStageId === stage.id ? 'active' : ''}
+                  onClick={() => setActiveStageId(stage.id)}
+                >
+                  Phase {index + 1}
+                </button>
+              ))}
+            </section>
 
-                <div className="lesson-reel">
-                  {stage.lessons.map((lessonId, lIdx) => {
-                    const lesson = curriculum.find(l => l.id === lessonId);
-                    if (!lesson) return null;
-                    const isDone = completedSet.has(lessonId);
-                    
-                    let isLocked = false;
-                    if (lIdx > 0) {
-                      isLocked = !completedSet.has(stage.lessons[lIdx - 1]);
-                    } else if (sIdx > 0) {
-                      const prevStage = path.stages[sIdx - 1];
-                      const lastLessonOfPrevStage = prevStage.lessons[prevStage.lessons.length - 1];
-                      isLocked = !completedSet.has(lastLessonOfPrevStage);
-                    }
+            <section className="module-browser">
+              {visibleStages.map((stage, stageIndex) => (
+                <article key={stage.id} className="phase-section">
+                  <header className="phase-header">
+                    <span>{stageIndex + 1}</span>
+                    <h2>{stage.title}</h2>
+                  </header>
 
-                    return (
-                      <motion.div 
-                        key={lessonId}
-                        whileHover={!isLocked ? { scale: 1.05 } : {}}
-                        className={`academy-lesson-card ${isDone ? 'done' : ''} ${isLocked ? 'locked' : ''}`}
-                        onClick={() => !isLocked && onSelectLesson(lesson)}
-                      >
-                        <div className="lesson-top">
-                          <span className={`diff ${lesson.difficulty.toLowerCase()}`}>{lesson.difficulty}</span>
-                          {isLocked ? <Lock size={14} /> : (isDone ? <Trophy size={14} className="accent" /> : <Play size={14} />)}
-                        </div>
-                        <h3>{lesson.title}</h3>
-                        <p>{lesson.subtitle}</p>
-                        <div className="lesson-bottom">
-                          <span>{lesson.xp} XP</span>
-                          <div className="progress-bar">
-                            <div className="progress-fill" style={{ width: isDone ? '100%' : '0%' }}></div>
+                  <div className="module-table">
+                    {stage.lessons.map((lessonId) => {
+                      const lesson = curriculum.find((item) => item.id === lessonId);
+                      if (!lesson) return null;
+
+                      const isDone = completedSet.has(lesson.id);
+
+                      return (
+                        <button key={lesson.id} className="module-row" onClick={() => onSelectLesson(lesson)}>
+                          <div className={`module-status ${isDone ? 'done' : ''}`}>{isDone ? 'Done' : 'Start'}</div>
+                          <div className="module-copy">
+                            <strong>{lesson.title}</strong>
+                            <span>{lesson.subtitle}</span>
                           </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </section>
+                          <div className={`module-difficulty ${lesson.difficulty.toLowerCase()}`}>{lesson.difficulty}</div>
+                          <div className="module-xp">+{lesson.xp} XP</div>
+                          <Play size={18} />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </article>
+              ))}
+            </section>
+          </>
         )}
 
-        {activeTab === 'settings' && (
-          <section className="settings-panel">
+        {activeTab === 'profile' && (
+          <section className="profile-page-panel">
+            <div className="profile-card-large">
+              <div className="avatar-large">{(profile.name || 'D')[0]}</div>
+              <div>
+                <h2>{profile.name}</h2>
+                <p>Level {profile.level} developer</p>
+              </div>
+            </div>
+
             <div className="setting-group">
               <label>Developer Handle</label>
               <div className="input-row">
                 <User size={20} className="muted" />
-                <input 
-                  type="text" 
-                  value={tempName} 
-                  onChange={(e) => setTempName(e.target.value)}
+                <input
+                  type="text"
+                  value={tempName}
+                  onChange={(event) => setTempName(event.target.value)}
                   className="academy-input"
                 />
                 <button className="save-btn" onClick={handleSaveSettings}>
@@ -148,26 +154,15 @@ const Dashboard = ({ profile, onSelectLesson, onBackToHome, updateProfile }) => 
           </section>
         )}
 
-        {activeTab === 'achievements' && (
-          <section className="achievements-panel">
-            <div className="empty-state">
-              <Trophy size={48} className="muted" />
-              <h3>No achievements yet</h3>
-              <p>Complete your first roadmap stage to earn a badge!</p>
+        {activeTab === 'progress' && (
+          <section className="progress-panel">
+            <div className="progress-ring">{progressPercent}%</div>
+            <div>
+              <h2>{completedCount} modules complete</h2>
+              <p>Keep moving through the roadmap. Completed lessons stay marked so you can resume without digging.</p>
             </div>
           </section>
         )}
-
-        {activeTab === 'lab' && (
-          <section className="lab-panel">
-            <div className="empty-state">
-              <Terminal size={48} className="muted" />
-              <h3>Sandbox Lab (Coming Soon)</h3>
-              <p>Freeform coding environments are currently under construction.</p>
-            </div>
-          </section>
-        )}
-
       </main>
     </div>
   );

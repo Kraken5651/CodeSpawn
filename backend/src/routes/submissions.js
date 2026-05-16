@@ -4,15 +4,15 @@
 
 const express = require('express');
 const submissionController = require('../controllers/submissionController');
-const { authMiddleware } = require('../middleware/authMiddleware');
+const { authMiddleware, optionalAuth } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Submit code (protected)
-router.post('/', authMiddleware, submissionController.submitCode);
+// Submit code. Uses authenticated user when present, otherwise falls back to demo mode.
+router.post('/', optionalAuth, submissionController.submitCode);
 
-// Get submissions for a problem (protected)
-router.get('/problem/:problem_id', authMiddleware, submissionController.getSubmissionsByProblem);
+// Get submissions for a problem. Anonymous users receive an empty history.
+router.get('/problem/:problem_id', optionalAuth, submissionController.getSubmissionsByProblem);
 
 // Get submission by ID (protected)
 router.get('/:id', authMiddleware, submissionController.getSubmissionById);

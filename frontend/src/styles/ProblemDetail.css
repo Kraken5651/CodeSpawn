@@ -337,6 +337,16 @@
   color: var(--text-secondary);
 }
 
+.result-error {
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #fecaca;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .test-case-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color);
@@ -395,4 +405,44 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
+}
+
+@media (max-width: 980px) {
+  .problem-detail-container {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .problem-header {
+    height: auto;
+    min-height: 56px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .header-left,
+  .header-center,
+  .header-right,
+  .action-buttons {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .problem-workspace {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .problem-description-panel {
+    min-width: 0;
+  }
+
+  .editor-console-panel,
+  .editor-panel,
+  .console-panel {
+    min-height: 360px;
+  }
 }

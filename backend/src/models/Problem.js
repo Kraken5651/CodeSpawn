@@ -34,6 +34,13 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
+    category_id: {
+      type: DataTypes.UUID,
+      references: {
+        model: 'categories',
+        key: 'id'
+      }
+    },
     language_id: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -115,6 +122,7 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
     paranoid: true
   });
 
@@ -127,6 +135,11 @@ module.exports = (sequelize, DataTypes) => {
     Problem.belongsTo(models.Language, {
       foreignKey: 'language_id',
       as: 'language'
+    });
+
+    Problem.belongsTo(models.Category, {
+      foreignKey: 'category_id',
+      as: 'category'
     });
 
     Problem.belongsTo(models.User, {

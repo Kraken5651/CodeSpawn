@@ -48,7 +48,7 @@ export const csharpDocs = [
       },
       {
         id: 5, title: "String Operations",
-        content: `**Interpolation:** The easiest way to build strings: \$\"Hello {name}\".
+        content: `**Interpolation:** The easiest way to build strings: $"Hello {name}".
 **StringBuilder:** Use this when you are changing a string hundreds of times (like in a loop) to keep your game fast.`
       }
     ]

@@ -1,26 +1,83 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Send, RotateCcw, Lightbulb, CheckCircle, XCircle, Loader2, Maximize2, Terminal, Book, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronLeft, Send, RotateCcw, Lightbulb, Loader2, Maximize2, Terminal, Book, FileText, Home, User, ListChecks } from 'lucide-react';
 import GamePreview from './GamePreview';
 import { csharpDocs } from '../data/csharpDocs';
 
-const LearningArea = ({ lesson, onBack, onComplete, onNext }) => {
-  const [code, setCode] = useState(lesson.starterCode);
+const makeLog = (msg, type = 'system') => ({
+  msg,
+  type,
+  time: new Date().toLocaleTimeString(),
+});
+
+const normalizeCode = (value) => value.replace(/\s+/g, '').toLowerCase();
+
+const hasBalancedPairs = (value, open, close) => {
+  let depth = 0;
+  for (const char of value) {
+    if (char === open) depth += 1;
+    if (char === close) depth -= 1;
+    if (depth < 0) return false;
+  }
+  return depth === 0;
+};
+
+const validateLessonCode = (lesson, code) => {
+  const trimmed = code.trim();
+  const starter = lesson.starterCode?.trim() || '';
+
+  if (!trimmed) {
+    return { passed: false, message: 'The editor is empty.' };
+  }
+
+  if (trimmed === starter) {
+    return { passed: false, message: 'Change the starter code before running it.' };
+  }
+
+  if (!hasBalancedPairs(code, '{', '}') || !hasBalancedPairs(code, '(', ')')) {
+    return { passed: false, message: 'Unbalanced braces or parentheses.' };
+  }
+
+  const codeWithoutComments = code.replace(/\/\/.*$/gm, '');
+  const missingHint = lesson.solutionHints.find((hint) => {
+    const source = hint.trim() === '//' ? code : codeWithoutComments;
+    return !normalizeCode(source).includes(normalizeCode(hint));
+  });
+
+  if (missingHint) {
+    return { passed: false, message: `Missing required concept: ${missingHint}` };
+  }
+
+  if (lesson.language === 'csharp') {
+    const hasExecutableStatement = /;|=>|\breturn\b|\bclass\b|\binterface\b|\benum\b/.test(codeWithoutComments);
+
+    if (!hasExecutableStatement) {
+      return { passed: false, message: 'No executable C# statement or declaration found.' };
+    }
+  }
+
+  return { passed: true, message: 'Required concepts found.' };
+};
+
+const LearningArea = ({ lesson, lessons = [], onBack, onHome, onProfile, onSelectLesson, onComplete, onNext }) => {
+  const [code, setCode] = useState(lesson?.starterCode || '');
   const [showHint, setShowHint] = useState(0); // 0: None, 1: Logic, 2: Code
   const [submission, setSubmission] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState([makeLog('> Choose a lesson to initialize the workspace.')]);
   const [activeSideTab, setActiveSideTab] = useState('task'); // 'task' or 'docs'
   const editorRef = useRef(null);
 
   useEffect(() => {
+    if (!lesson) return;
+
     setCode(lesson.starterCode);
     setSubmission(null);
     setShowHint(0);
     setIsSubmitting(false);
     setActiveSideTab('task');
-    setLogs([`> Environment: ${lesson.language.toUpperCase()} initialized.`]);
+    setLogs([makeLog(`> Environment: ${lesson.language.toUpperCase()} initialized.`)]);
   }, [lesson]);
 
   const handleEditorDidMount = (editor) => {
@@ -29,22 +86,35 @@ const LearningArea = ({ lesson, onBack, onComplete, onNext }) => {
   };
 
   const addLog = (msg, type = 'system') => {
-    setLogs(prev => [...prev, { msg, type, time: new Date().toLocaleTimeString() }]);
+    setLogs(prev => [...prev, makeLog(msg, type)]);
   };
 
+  if (!lesson) {
+    return (
+      <div className="workspace-empty">
+        <div className="workspace-empty-card">
+          <Book size={42} />
+          <h1>Lesson not found</h1>
+          <p>This module could not be loaded. Return to the academy and choose a visible lesson.</p>
+          <button onClick={onBack} className="submit-btn-elite">
+            <ChevronLeft size={16} /> Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const handleRun = () => {
-    addLog("Compiling code...", "meta");
+    const validation = validateLessonCode(lesson, code);
+
+    addLog("Checking code against lesson requirements...", "meta");
     setTimeout(() => {
-      addLog("Build succeeded. Simulating runtime...", "system");
-      setTimeout(() => {
-        // A simple heuristic for "running" code - just checking if it compiles
-        if (code.includes('Exception') || code.includes('throw')) {
-          addLog("Runtime Exception Thrown", "error");
-        } else {
-          addLog("Execution finished with exit code 0", "success");
-        }
-      }, 800);
-    }, 500);
+      if (validation.passed) {
+        addLog(`Run passed: ${validation.message}`, "success");
+      } else {
+        addLog(`Run failed: ${validation.message}`, "error");
+      }
+    }, 400);
   };
 
   const handleSubmit = async () => {
@@ -55,24 +125,16 @@ const LearningArea = ({ lesson, onBack, onComplete, onNext }) => {
 
     await new Promise(resolve => setTimeout(resolve, 1200));
 
-    const normalizedCode = code.replace(/\s/g, '').toLowerCase();
-    const passed = lesson.solutionHints.every(hint => 
-      normalizedCode.includes(hint.replace(/\s/g, '').toLowerCase())
-    );
+    const validation = validateLessonCode(lesson, code);
+    const passed = validation.passed;
 
     if (passed) {
       setSubmission({ passed: true, message: "Logic Verified." });
       addLog("Execution Successful: Condition Met.", "success");
-      onComplete(lesson);
-      
-      // Auto-advance after a short delay
-      setTimeout(() => {
-        if (onNext) onNext();
-      }, 1500);
-      
+      onComplete?.(lesson);
     } else {
-      setSubmission({ passed: false, message: "Logic Error." });
-      addLog("Execution Failed: Requirements mismatch.", "error");
+      setSubmission({ passed: false, message: validation.message });
+      addLog(`Execution Failed: ${validation.message}`, "error");
       setIsSubmitting(false);
     }
   };
@@ -93,6 +155,9 @@ const LearningArea = ({ lesson, onBack, onComplete, onNext }) => {
           <button onClick={onBack} className="back-btn-elite">
             <ChevronLeft size={16} /> Exit
           </button>
+          <button onClick={onHome} className="back-btn-elite">
+            <Home size={16} /> Home
+          </button>
           <div className="divider"></div>
           <Book size={16} className="muted" />
           <span className="crumb">{lesson.category}</span>
@@ -100,6 +165,23 @@ const LearningArea = ({ lesson, onBack, onComplete, onNext }) => {
           <span className="crumb-active">{lesson.title}</span>
         </div>
         <div className="header-right">
+          <label className="module-jump">
+            <ListChecks size={14} />
+            <select
+              value={lesson.id}
+              onChange={(event) => {
+                const selected = lessons.find((item) => item.id === event.target.value);
+                if (selected) onSelectLesson?.(selected);
+              }}
+            >
+              {lessons.map((item) => (
+                <option key={item.id} value={item.id}>{item.title}</option>
+              ))}
+            </select>
+          </label>
+          <button className="run-btn" onClick={onProfile}>
+            <User size={14} /> Profile
+          </button>
           <div className="xp-badge">+{lesson.xp} XP</div>
           <button className="run-btn" onClick={handleRun}>Run Code</button>
           
@@ -121,6 +203,25 @@ const LearningArea = ({ lesson, onBack, onComplete, onNext }) => {
       </nav>
 
       <div className="workspace-body">
+        <aside className="module-rail panel">
+          <div className="panel-tabs">
+            <div className="tab active"><ListChecks size={12} /> Modules</div>
+          </div>
+          <div className="module-list scrollbar">
+            {lessons.map((item, index) => (
+              <button
+                key={item.id}
+                className={`module-link ${item.id === lesson.id ? 'active' : ''}`}
+                onClick={() => onSelectLesson?.(item)}
+              >
+                <span>{index + 1}</span>
+                <strong>{item.title}</strong>
+                <small>{item.subtitle}</small>
+              </button>
+            ))}
+          </div>
+        </aside>
+
         {/* Panel 1: Doc / Task */}
         <div className="panel doc-panel-elite">
           <div className="panel-tabs">

@@ -50,7 +50,8 @@ const getAllProblems = async (req, res, next) => {
       where,
       include: [
         { association: 'difficulty', attributes: ['id', 'name', 'xp_reward'] },
-        { association: 'language', attributes: ['id', 'name'] }
+        { association: 'language', attributes: ['id', 'name', 'slug'] },
+        { association: 'category', attributes: ['id', 'name', 'slug'], required: false }
       ],
       order,
       limit: parseInt(limit),
@@ -82,6 +83,7 @@ const getProblemById = async (req, res, next) => {
       include: [
         { association: 'difficulty' },
         { association: 'language' },
+        { association: 'category', required: false },
         {
           association: 'test_cases',
           where: { is_hidden: false },
